@@ -29,7 +29,7 @@ from service.models import db, Customer
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
-
+BASE_URL = "/customers"
 
 ######################################################################
 #  T E S T   C A S E S
@@ -72,4 +72,28 @@ class TestYourResourceService(TestCase):
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-    # Todo: Add your test cases here...
+    # ----------------------------------------------------------
+    # TEST READ
+    # ----------------------------------------------------------
+    def test_get_customer(self):
+        """It should Get a single Customer"""
+        # get the id of a customer
+
+        # Todo:uncomment this code when _create_customers is implemented
+        # test_customer = self._create_customers(1)[0]
+        # response = self.client.get(f"{BASE_URL}/{test_customer.id}")
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # data = response.get_json()
+        # self.assertEqual(data["name"], test_customer.name)
+        # self.assertEqual(data["password"], test_customer.password)
+        # self.assertEqual(data["email"], test_customer.email)
+        # self.assertEqual(data["address"], test_customer.address)
+        # self.assertEqual(data["active"], test_customer.active)
+
+    def test_get_customer_not_found(self):
+        """It should not Get a Customer thats not found"""
+        response = self.client.get(f"{BASE_URL}/0")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn("was not found", data["message"])

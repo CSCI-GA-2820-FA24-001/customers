@@ -15,7 +15,7 @@
 ######################################################################
 
 """
-Test cases for Pet Model
+Test cases for Customer Model
 """
 
 # pylint: disable=duplicate-code
@@ -79,3 +79,20 @@ class TestCustomer(TestCase):
         self.assertEqual(data.address, account.address)
         self.assertEqual(data.email, account.email)
         self.assertEqual(data.active, account.active)
+
+
+    def test_read_a_customer(self):
+        """It should Read a Customer"""
+        customer = CustomerFactory()
+        logging.debug(customer)
+        customer.id = None
+        customer.create()
+        self.assertIsNotNone(customer.id)
+        # Fetch it back
+        found_customer = Customer.find(customer.id)
+        self.assertEqual(found_customer.id, customer.id)
+        self.assertEqual(found_customer.name, customer.name)
+        self.assertEqual(found_customer.password, customer.password)
+        self.assertEqual(found_customer.email, customer.email)
+        self.assertEqual(found_customer.address, customer.address)
+        self.assertEqual(found_customer.active, customer.active)
