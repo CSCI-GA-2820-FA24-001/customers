@@ -22,7 +22,7 @@ spec:
       restartPolicy: Always
       containers:
       - name: customers
-        image: localhost:5000/nyu-devops/customers:1.0.0
+        image: cluster-registry:5000/nyu-devops/customers:1.0.0
         # image: customers
         imagePullPolicy: IfNotPresent
         ports:
