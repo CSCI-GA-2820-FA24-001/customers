@@ -16,7 +16,7 @@ This lab uses Docker and Visual Studio Code with the Remote Containers extension
 
 You will need the following software installed:
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [Docker Desktop](https://www.docker.com/customers/docker-desktop)
 - [Visual Studio Code](https://code.visualstudio.com)
 - [Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension from the Visual Studio Marketplace
 
@@ -135,8 +135,60 @@ make run
 
 You should be able to reach the service at: http://localhost:8000. The port that is used is controlled by an environment variable defined in the `.flaskenv` file which Flask uses to load it's configuration from the environment by default.
 
+## Deployment
+
+Deployment of our `customers` service can be done in following steps:
+
+1. Create dev cluster
+
+```shell
+make cluster
+```
+
+2. Build this project as a Docker image
+
+```shell
+docker build -t customers:1.0 .
+```
+
+3. Create tag and push our image to K3d registry
+
+```shell
+docker tag customers:1.0 cluster-registry:5000/customers:1.0
+docker push cluster-registry:5000/customers:1.0
+```
+
+4. Create and switch to a new Kubernetes Namespace
+
+```shell
+kubectl create namespace deployment
+kubectl config set-context --current --namespace deployment
+```
+
+5. Deploy our image with postgresql and customers service
+
+```shell
+kubectl apply -f k8s/postgres
+kubectl apply -f k8s
+```
+
+6. View deployed services and logs from a certain service, now we can access `http://localhost:8080` for our `customers` service that is deployed on local cluster
+
+```shell
+kubectl get all
+kubectl get pods
+kubectl logs pod/<pod-name>
+```
+
+7. Remove all services from the namespace
+
+```shell
+kubectl delete -f k8s/
+kubectl delete -f k8s/postgres
+```
+
 ## Shutdown development 
-ironment
+environment
 
 If you are using Visual Studio Code with Docker, simply existing Visual Studio Code will stop the docker containers. They will start up again the next time you need to develop as long as you don't manually delete them.
 

@@ -1,25 +1,25 @@
 # The petstore database should be created for you, if not here is the command:
-# psql -c "create database petstore;" -U customers
+# psql -c "create database petstore;" -U postgres
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: customers
+  name: postgres
   labels:
-    app: customers
+    app: postgres
 spec:
-  serviceName: "customers"
+  serviceName: "postgres"
   replicas: 1
   selector:
     matchLabels:
-      app: customers
+      app: postgres
   template:
     metadata:
       labels:
-        app: customers
+        app: postgres
     spec:
       containers:
-        - name: customers
+        - name: postgres
           image: postgres:15-alpine
           ports:
             - containerPort: 5432
@@ -41,7 +41,7 @@ spec:
                     name: postgres-config
                     key: postgres_db
           volumeMounts:
-          - name: customers-storage
+          - name: postgres-storage
             mountPath: /var/lib/postgresql
           resources:
             limits:
