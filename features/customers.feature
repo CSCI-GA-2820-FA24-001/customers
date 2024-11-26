@@ -79,7 +79,7 @@ Scenario: Delete a Customer
     Then I should see the message "Success"
     And I should not see "fido" in the results
 
-Scenario: List all pets
+Scenario: List all Customers
     When I visit the "Home Page"
     And I press the "Clear" button
     And I press the "Search" button
