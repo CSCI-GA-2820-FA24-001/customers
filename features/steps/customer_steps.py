@@ -22,20 +22,15 @@ Steps file for Customers.feature
 For information on Waiting until elements are present in the HTML see:
     https://selenium-python.readthedocs.io/waits.html
 """
-import requests, os
+import requests
 from compare3 import expect
-from behave import given, when, then  # pylint: disable=no-name-in-module
-
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select, WebDriverWait
-from selenium.webdriver.support import expected_conditions
+from behave import given  # pylint: disable=no-name-in-module
 
 HTTP_200_OK = 200
 HTTP_201_CREATED = 201
 HTTP_204_NO_CONTENT = 204
 
 WAIT_TIMEOUT = 60
-ID_PREFIX = "customer_"
 
 
 @given("the following Customers")
@@ -57,88 +52,11 @@ def step_impl(context):
     for row in context.table:
         payload = {
             "name": row["name"],
-            "password": row["password"],
-            "active": row["active"] in ["True", "true", "1"],
-            "id": row["id"],
             "email": row["email"],
+            "active": row["active"] in ["True", "true", "1"],
             "address": row["address"],
+            "id": row["id"],
+            "password": row["password"],
         }
         context.resp = requests.post(rest_endpoint, json=payload, timeout=WAIT_TIMEOUT)
         expect(context.resp.status_code).equal_to(HTTP_201_CREATED)
-
-
-@when('I visit the "Home Page"')
-def step_impl(context):
-    context.resp = requests.get(context.base_url + "/")
-    assert context.resp.status_code == 200
-
-
-@then('I should see "{message}" in the title')
-def step_impl(context, message):
-    assert message in str(context.resp.text)
-
-
-@then('I should not see "{text_string}"')
-def step_impl(context, text_string):
-    element = context.driver.find_element(By.TAG_NAME, "body")
-    assert text_string not in element.text
-
-
-@when('I set the "{element_name}" to "{text_string}"')
-def step_impl(context, element_name, text_string):
-    assert True  # TODO: erase this line
-
-
-@when('I select "{text}" in the "{element_name}" dropdown')
-def step_impl(context, text, element_name):
-    assert True  # TODO: erase this line
-
-
-@then('I should see "{text}" in the "{element_name}" dropdown')
-def step_impl(context, text, element_name):
-    assert True  # TODO: erase this lined
-
-
-@then('the "{element_name}" field should be empty')
-def step_impl(context, element_name):
-    assert True  # TODO: erase this lined
-
-
-@when('I press the "{button}" button')
-def step_impl(context, button):
-    assert True  # TODO: erase this lined
-
-
-@then('I should see "{name}" in the results')
-def step_impl(context, name):
-    assert True  # TODO: erase this lined
-
-
-@then('I should not see "{name}" in the results')
-def step_impl(context, name):
-    assert True  # TODO: erase this lined
-
-
-@then('I should see the message "{message}"')
-def step_impl(context, message):
-    assert True  # TODO: erase this lined
-
-
-@when('I copy the "{element_name}" field')
-def step_impl(context, element_name):
-    assert True  # TODO: erase this lined
-
-
-@when('I paste the "{element_name}" field')
-def step_impl(context, element_name):
-    assert True  # TODO: erase this lined
-
-
-@then('I should see "{text_string}" in the "{element_name}" field')
-def step_impl(context, text_string, element_name):
-    assert True  # TODO: erase this lined
-
-
-@when('I change "{element_name}" to "{text_string}"')
-def step_impl(context, element_name, text_string):
-    assert True  # TODO: erase this lined

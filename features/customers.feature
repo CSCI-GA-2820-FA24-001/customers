@@ -37,32 +37,14 @@ Scenario: Create a Customer
     And I should see "True" in the "Active" dropdown
     And I should see "My-place" in the "Address" field
 
-Scenario: List all pets
+Scenario: Read a Customer
     When I visit the "Home Page"
-    And I press the "Search" button
-    Then I should see the message "Success"
-    And I should see "fido" in the results
-    And I should see "kitty" in the results
-    And I should see "leo" in the results
-
-Scenario: Search for sammy
-    When I visit the "Home Page"
-    And I set the "Name" to "sammy"
-    And I press the "Search" button
-    Then I should see the message "Success"
-    And I should see "sammy" in the results
-    And I should not see "fido" in the results
-    And I should not see "kitty" in the results
-
-Scenario: Search for active
-    When I visit the "Home Page"
-    And I select "True" in the "Active" dropdown
-    And I press the "Search" button
-    Then I should see the message "Success"
-    And I should see "fido" in the results
-    And I should see "kitty" in the results
-    And I should see "sammy" in the results
-    And I should not see "leo" in the results
+    And I set the "Id" to "123456"
+    And I press the "Retrieve" button
+    Then I should see "fido" in the "Name" field
+    And I should see "fido123@gmail.com" in the "Email" field
+    And I should see "True" in the "Active" dropdown
+    And I should see "12-abc" in the "Address" field
 
 Scenario: Update a Customer
     When I visit the "Home Page"
@@ -85,3 +67,59 @@ Scenario: Update a Customer
     Then I should see the message "Success"
     And I should see "Loki" in the results
     And I should not see "fido" in the results
+
+Scenario: Delete a Customer
+    When I visit the "Home Page"
+    And I set the "Id" to "123456"
+    And I press the "Delete" button
+    Then I should see the message "Success"
+    And I should not see "fido" in the results
+
+Scenario: List all pets
+    When I visit the "Home Page"
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "fido" in the results
+    And I should see "kitty" in the results
+    And I should see "leo" in the results
+
+Scenario: Search for Name "sammy"
+    When I visit the "Home Page"
+    And I set the "Name" to "sammy"
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "sammy" in the results
+    And I should not see "fido" in the results
+    And I should not see "kitty" in the results
+
+Scenario: Search for Active
+    When I visit the "Home Page"
+    And I select "True" in the "Active" dropdown
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "fido" in the results
+    And I should see "kitty" in the results
+    And I should see "sammy" in the results
+    And I should not see "leo" in the results
+
+Scenario: Deactivate a Customer
+    When I visit the "Home Page"
+    And I set the "Id" to "123456"
+    And I press the "Retrieve" button
+    Then I should see "fido" in the "Name" field
+    And I should see "True" in the "Active" dropdown
+    When I select "False" in the "Active" dropdown
+    And I press the "Deactivate" button
+    Then I should see the message "Customer has been Deactivated!"
+    And I should see "False" in the "Active" dropdown
+
+Scenario: Activate a Customer
+    When I visit the "Home Page"
+    And I set the "Id" to "765432"
+    And I press the "Retrieve" button
+    Then I should see "leo" in the "Name" field
+    And I should see "False" in the "Active" dropdown
+    When I select "True" in the "Active" dropdown
+    And I press the "Activate" button
+    Then I should see the message "Customer has been Activated!"
+    And I should see "True" in the "Active" dropdown
