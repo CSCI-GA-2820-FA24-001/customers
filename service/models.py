@@ -17,6 +17,10 @@ class DataValidationError(Exception):
     """Used for an data validation errors when deserializing"""
 
 
+class DatabaseConnectionError(Exception):
+    """Custom Exception when database connection fails"""
+
+
 class Customer(db.Model):
     """
     Class that represents a Customer
