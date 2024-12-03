@@ -1,3 +1,5 @@
+const BASE_URL = "/api/customers"
+
 $(function () {
 
     // ****************************************
@@ -59,7 +61,7 @@ $(function () {
         
         let ajax = $.ajax({
             type: "POST",
-            url: "/customers",
+            url: "BASE_URL",
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -101,7 +103,7 @@ $(function () {
 
         let ajax = $.ajax({
                 type: "PUT",
-                url: `/customers/${customer_id}`,
+                url: `${BASE_URL}/${customer_id}`,
                 contentType: "application/json",
                 data: JSON.stringify(data)
             })
@@ -129,7 +131,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/customers/${customer_id}`,
+            url: `${BASE_URL}/${customer_id}`,
             contentType: "application/json",
             data: ''
         })
@@ -159,7 +161,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/customers/${customer_id}`,
+            url: `${BASE_URL}/${customer_id}`,
             contentType: "application/json",
             data: '',
         })
@@ -226,7 +228,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/customers?${queryString}`,
+            url: `${BASE_URL}?${queryString}`,
             contentType: "application/json",
             data: ''
         })

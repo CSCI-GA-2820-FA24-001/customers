@@ -33,7 +33,7 @@ from .factories import CustomerFactory
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
-BASE_URL = "/customers"
+BASE_URL = "/api/customers"
 
 
 ######################################################################
@@ -105,6 +105,14 @@ class TestCustomerService(TestCase):
         self.assertEqual(data["message"], "Healthy")
 
     # ----------------------------------------------------------
+    # TEST INVALID METHODS
+    # ----------------------------------------------------------
+    def test_delete_invalid_methods(self):
+        """It should throw HTTP 405, METHOD_NOT_ALLOWED"""
+        response = self.client.delete(f"{BASE_URL}")
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    # ----------------------------------------------------------
     # TEST LIST
     # ----------------------------------------------------------
     def test_get_customer_list(self):
@@ -135,7 +143,8 @@ class TestCustomerService(TestCase):
 
     def test_get_customer_not_found(self):
         """It should not Get a Customer thats not found"""
-        response = self.client.get(f"{BASE_URL}/0")
+        non_existent_uuid = "00000000-0000-0000-0000-000000000000"
+        response = self.client.get(f"{BASE_URL}/{non_existent_uuid}")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         data = response.get_json()
         logging.debug("Response data = %s", data)
