@@ -175,6 +175,21 @@ def index():
 
 
 ######################################################################
+# ERROR HANDLERS
+######################################################################
+@api.errorhandler
+def default_error_handler(error):
+    """Default error handler"""
+    status_code = getattr(error, "code", status.HTTP_500_INTERNAL_SERVER_ERROR)
+    message = getattr(error, "description", str(error))
+    response = {
+        "status": status_code,
+        "message": message,
+    }
+    return response, status_code
+
+
+######################################################################
 # FLASK-RESTX APIs
 ######################################################################
 @api.route("/customers/<uuid:customer_id>")
