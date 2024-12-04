@@ -347,12 +347,12 @@ class ActivateResource(Resource):
                 status.HTTP_404_NOT_FOUND,
                 f"Customer with id [{customer_id}] not found.",
             )
-        customer.active_status = True
+        customer.active = True
         customer.update()
         app.logger.info("Customer with id [%s] has been activated!", customer.id)
         return {
             "message": "Customer activated",
-            "active_status": customer.active_status,
+            "active_status": customer.active,
         }, status.HTTP_200_OK
 
 
@@ -380,12 +380,12 @@ class DeactivateResource(Resource):
                 status.HTTP_404_NOT_FOUND,
                 f"Customer with id [{customer_id}] not found.",
             )
-        customer.active_status = False
+        customer.active = False
         customer.update()
         app.logger.info("Customer with id [%s] has been deactivated!", customer.id)
         return {
             "message": "Customer deactivated",
-            "active_status": customer.active_status,
+            "active_status": customer.active,
         }, status.HTTP_200_OK
 
 
