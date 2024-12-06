@@ -96,12 +96,34 @@ class Customer(db.Model):
         Args:
             data (dict): A dictionary containing the resource data
         """
-        self.id = data["id"]
-        self.name = data["name"]
-        self.password = data["password"]
-        self.email = data["email"]
-        self.address = data["address"]
-        self.active = data["active"]
+        # id might not be present on create customer
+        try:
+            self.id = data["id"]
+        except AttributeError as error:
+            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
+        except KeyError:
+            pass
+
+        # address is optional parameter
+        try:
+            self.address = data["address"]
+        except AttributeError as error:
+            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
+        except KeyError:
+            pass
+
+        # the rest are required
+        try:
+            self.name = data["name"]
+            self.password = data["password"]
+            self.email = data["email"]
+            self.active = data["active"]
+        except AttributeError as error:
+            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
+        except KeyError as error:
+            raise DataValidationError(
+                "Invalid Customer: missing " + error.args[0]
+            ) from error
 
         return self
 

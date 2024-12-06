@@ -201,3 +201,12 @@ class TestCustomer(TestCase):
         customer.create()
         found_customer = Customer.find_by_active(customer.active)
         self.assertEqual(customer.id, found_customer[0].id)
+
+    def test_deserialize_missing_data(self):
+        """It should raise DataValidationError when deserializing with missing fields"""
+        data = {
+            "name": "foo",
+        }
+        customer = Customer()
+        with self.assertRaises(DataValidationError):
+            customer.deserialize(data)
