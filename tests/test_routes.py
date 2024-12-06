@@ -34,6 +34,7 @@ DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
 BASE_URL = "/api/customers"
+CONTENT_TYPE_JSON = "application/json"
 
 
 ######################################################################
@@ -143,7 +144,7 @@ class TestCustomerService(TestCase):
 
     def test_get_customer_not_found(self):
         """It should not Get a Customer thats not found"""
-        non_existent_uuid = "00000000-0000-0000-0000-000000000000"
+        non_existent_uuid = 22
         response = self.client.get(f"{BASE_URL}/{non_existent_uuid}")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         data = response.get_json()
@@ -158,8 +159,12 @@ class TestCustomerService(TestCase):
         """It should Create a new Customer"""
         test_customer = CustomerFactory()
         logging.debug("Test Customer: %s", test_customer.serialize())
-        response = self.client.post(BASE_URL, json=test_customer.serialize())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.post(
+            BASE_URL,
+            json=test_customer.serialize(),
+            content_type=CONTENT_TYPE_JSON,
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
         # Make sure location header is set
         location = response.headers.get("Location", None)
@@ -167,7 +172,6 @@ class TestCustomerService(TestCase):
 
         # Check the data is correct
         new_customer = response.get_json()
-        self.assertEqual(new_customer["id"], test_customer.id)
         self.assertEqual(new_customer["name"], test_customer.name)
         self.assertEqual(new_customer["password"], test_customer.password)
         self.assertEqual(new_customer["email"], test_customer.email)
@@ -177,7 +181,6 @@ class TestCustomerService(TestCase):
         response = self.client.get(location)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         new_customer = response.get_json()
-        self.assertEqual(new_customer["id"], test_customer.id)
         self.assertEqual(new_customer["name"], test_customer.name)
         self.assertEqual(new_customer["password"], test_customer.password)
         self.assertEqual(new_customer["email"], test_customer.email)
@@ -191,8 +194,11 @@ class TestCustomerService(TestCase):
         """It should Update an existing Customer"""
         # create a customer to update
         test_customer = CustomerFactory()
-        response = self.client.post(BASE_URL, json=test_customer.serialize())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.post(
+            BASE_URL,
+            json=test_customer.serialize(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json)
 
         # update the customer
         new_customer = response.get_json()
@@ -207,7 +213,7 @@ class TestCustomerService(TestCase):
 
     def test_update_customer_not_found(self):
         """It should not Update a Customer thats not found"""
-        response = self.client.get(f"{BASE_URL}/0")
+        response = self.client.get(f"{BASE_URL}/22")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         data = response.get_json()
         logging.debug("Response data = %s", data)
@@ -321,6 +327,27 @@ class TestCustomerService(TestCase):
     # ----------------------------------------------------------
     # TEST ACTIONS
     # ----------------------------------------------------------
+    def test_activate_customer(self):
+        """It should activate a Customer account"""
+        customer = CustomerFactory()
+        logging.debug("Test Customer: %s", customer.serialize())
+        response = self.client.post(BASE_URL, json=customer.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        new_customer = response.get_json()
+        new_customer["active"] = True
+        response = self.client.put(f"{BASE_URL}/{new_customer['id']}/activate")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get(f"{BASE_URL}/{new_customer['id']}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_customer = response.get_json()
+        logging.debug("Response data: %s", new_customer)
+        self.assertEqual(new_customer["active"], True)
+
+        new_customer["id"] += 1
+        response = self.client.put(f"{BASE_URL}/{new_customer['id']}/activate")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_deactivate_customer(self):
         """It should Deactivate a Customer account"""
         customer = CustomerFactory()
@@ -328,16 +355,18 @@ class TestCustomerService(TestCase):
         response = self.client.post(BASE_URL, json=customer.serialize())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.put(f"{BASE_URL}/{customer.id}/deactivate")
+        new_customer = response.get_json()
+        new_customer["active"] = False
+        response = self.client.put(f"{BASE_URL}/{new_customer['id']}/deactivate")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.get(f"{BASE_URL}/{customer.id}")
+        response = self.client.get(f"{BASE_URL}/{new_customer['id']}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.get_json()
-        logging.debug("Response data: %s", data)
-        self.assertEqual(data["active"], False)
+        new_customer = response.get_json()
+        logging.debug("Response data: %s", new_customer)
+        self.assertEqual(new_customer["active"], False)
 
-        bad_customer = CustomerFactory()
-        response = self.client.put(f"{BASE_URL}/{bad_customer.id}/deactivate")
+        new_customer["id"] += 1
+        response = self.client.put(f"{BASE_URL}/{new_customer['id']}/deactivate")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
