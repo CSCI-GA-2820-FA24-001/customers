@@ -223,9 +223,41 @@ class TestCustomer(TestCase):
         with self.assertRaises(DataValidationError):
             customer.deserialize(data)
 
+        data = {
+            "name": "foo",
+            "email": None,
+            "password": None,
+            "active": True,
+        }
+        with self.assertRaises(DataValidationError):
+            customer.deserialize(data)
+
+        data = {
+            "name": "foo",
+            "email": "",
+            "password": "",
+            "active": True,
+        }
+
     def test_deserialize_invalid_attribute(self):
         """It should raise DataValidationError when deserializing data with invalid attributes"""
         data = ""
         customer = Customer()
         with self.assertRaises(DataValidationError):
             customer.deserialize(data)
+
+    def test_deserialize_bad_data(self):
+        """It should raise DataValidationError when deserializing data with invalid attributes"""
+        # active should be a bool
+        data = {"name": "foo", "email": "bar", "password": "luck", "active": "string"}
+        customer = Customer()
+        with self.assertRaises(DataValidationError):
+            customer.deserialize(data)
+
+        # address is optional
+        customer.name = "foo"
+        customer.email = "bar"
+        customer.password = "luck"
+        customer.active = True
+        customer.create()
+        self.assertIsNotNone(customer.id)

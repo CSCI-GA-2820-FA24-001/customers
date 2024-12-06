@@ -6,6 +6,7 @@ All of the models are stored in this module
 
 import logging
 from flask_sqlalchemy import SQLAlchemy
+from flask import current_app as app
 
 logger = logging.getLogger("flask.app")
 
@@ -43,12 +44,14 @@ class Customer(db.Model):
         """
         Creates a Customer to the database
         """
-        logger.info("Creating %s", self.name)
+        app.logger.info("Creating %s, %s, %s", self.name, self.email, self.password)
+
         self.id = None  # pylint: disable=invalid-name
 
         if self.name is None:
             raise DataValidationError("name attribute is not set")
         if self.email is None:
+            app.logger.info("no email")
             raise DataValidationError("email attribute is not set")
         if self.password is None:
             raise DataValidationError("password attribute is not set")
@@ -105,32 +108,30 @@ class Customer(db.Model):
             data (dict): A dictionary containing the resource data
         """
         # id might not be present on create customer
-        try:
-            self.id = data["id"]
-        except TypeError as error:
-            raise DataValidationError(
-                "Invalid customer: body of request contained bad or no data "
-                + str(error)
-            ) from error
-        except KeyError:
-            pass
-
-        # address is optional parameter
-        try:
-            self.address = data["address"]
-        except KeyError:
-            pass
-
-        # the rest are required
+        app.logger.info("deserialize(%s)", data)
         try:
             self.name = data["name"]
-            self.password = data["password"]
             self.email = data["email"]
-            self.active = data["active"]
+            if isinstance(data["active"], bool):
+                self.active = data["active"]
+            else:
+                raise DataValidationError(
+                    "Invalid type for boolean [active]: " + str(type(data["active"]))
+                )
+            self.address = data["address"]
+            self.password = data["password"]
         except KeyError as error:
             raise DataValidationError(
-                "Invalid Customer: missing " + error.args[0]
+                "Invalid customer: missing " + error.args[0]
             ) from error
+        except TypeError as error:
+            raise DataValidationError(
+                "Invalid pet: body of request contained bad or no data"
+            ) from error
+
+        # if there is no id and the data has one, assign it
+        if not self.id and "id" in data:
+            self.id = data["id"]
 
         return self
 
