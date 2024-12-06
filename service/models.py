@@ -99,16 +99,17 @@ class Customer(db.Model):
         # id might not be present on create customer
         try:
             self.id = data["id"]
-        except AttributeError as error:
-            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
+        except TypeError as error:
+            raise DataValidationError(
+                "Invalid customer: body of request contained bad or no data "
+                + str(error)
+            ) from error
         except KeyError:
             pass
 
         # address is optional parameter
         try:
             self.address = data["address"]
-        except AttributeError as error:
-            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError:
             pass
 
@@ -118,8 +119,6 @@ class Customer(db.Model):
             self.password = data["password"]
             self.email = data["email"]
             self.active = data["active"]
-        except AttributeError as error:
-            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Customer: missing " + error.args[0]
