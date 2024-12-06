@@ -96,6 +96,18 @@ class TestCustomer(TestCase):
         except DataValidationError:
             pass
 
+    def test_create_customer_missing_attribute(self):
+        """It should not create a Customer with missing fields"""
+        customer = Customer()
+        with self.assertRaises(DataValidationError):
+            customer.create()
+        customer.name = "foo"
+        with self.assertRaises(DataValidationError):
+            customer.create()
+        customer.email = "foo-email"
+        with self.assertRaises(DataValidationError):
+            customer.create()
+
     def test_read_a_customer(self):
         """It should Read a Customer"""
         customer = CustomerFactory()

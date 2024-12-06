@@ -45,6 +45,14 @@ class Customer(db.Model):
         """
         logger.info("Creating %s", self.name)
         self.id = None  # pylint: disable=invalid-name
+
+        if self.name is None:
+            raise DataValidationError("name attribute is not set")
+        if self.email is None:
+            raise DataValidationError("email attribute is not set")
+        if self.password is None:
+            raise DataValidationError("password attribute is not set")
+
         try:
             db.session.add(self)
             db.session.commit()
