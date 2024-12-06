@@ -29,7 +29,7 @@ class Customer(db.Model):
     ##################################################
     # Table Schema
     ##################################################
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(63), nullable=False)
     password = db.Column(db.String(63), nullable=False)
     email = db.Column(db.String(63), nullable=False)
@@ -44,7 +44,7 @@ class Customer(db.Model):
         Creates a Customer to the database
         """
         logger.info("Creating %s", self.name)
-        # self.id = None  # pylint: disable=invalid-name
+        self.id = None  # pylint: disable=invalid-name
         try:
             db.session.add(self)
             db.session.commit()
@@ -96,25 +96,13 @@ class Customer(db.Model):
         Args:
             data (dict): A dictionary containing the resource data
         """
-        try:
-            self.id = data["id"]
-            self.name = data["name"]
-            self.password = data["password"]
-            self.email = data["email"]
-            self.address = data["address"]
-            self.active = data["active"]
+        self.id = data["id"]
+        self.name = data["name"]
+        self.password = data["password"]
+        self.email = data["email"]
+        self.address = data["address"]
+        self.active = data["active"]
 
-        except AttributeError as error:
-            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
-        except KeyError as error:
-            raise DataValidationError(
-                "Invalid Customer: missing " + error.args[0]
-            ) from error
-        except TypeError as error:
-            raise DataValidationError(
-                "Invalid Customer: body of request contained bad or no data "
-                + str(error)
-            ) from error
         return self
 
     ##################################################

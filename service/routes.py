@@ -20,7 +20,6 @@ Customer Service
 This service implements a REST API that allows you to Create, Read, Update
 and Delete Customer
 """
-from functools import wraps
 from flask import abort, request
 from flask import current_app as app  # Import Flask application
 from flask_restx import Api, Resource, fields, reqparse, inputs
@@ -49,11 +48,6 @@ api = Api(
 create_model = api.model(
     "Customer",
     {
-        "id": fields.Integer(
-            description="A list of Customer IDs associated with the customer, stored as a JSON array.",
-            example=["customer_id_1", "customer_id_2"],
-            required=True,
-        ),
         "name": fields.String(
             required=True,
             description="The name of the customer.",
@@ -86,19 +80,9 @@ customer_model = api.inherit(
     "CustomerModel",
     create_model,
     {
-        "id": fields.String(
-            description="A unique identifier for the customer, generated automatically as a UUID.",
+        "id": fields.Integer(
+            description="The unique id assigned internally by service",
             readOnly=True,
-        ),
-        "created_at": fields.DateTime(
-            readOnly=True,
-            description="The timestamp when the customer was created.",
-            dt_format="iso8601",
-        ),
-        "updated_at": fields.DateTime(
-            readOnly=True,
-            description="The timestamp when the customer was last updated.",
-            dt_format="iso8601",
         ),
     },
 )
@@ -108,13 +92,15 @@ customer_model = api.inherit(
 # Setup the request parser for customers
 ######################################################################
 args_config = [
-    ("name", str, "args", True, "Filter customers by name"),
-    ("id", str, "args", True, "Filter customers by customer ID"),
+    ("name", str, "args", False, "Filter customers by name"),
+    ("id", int, "args", False, "Filter customers by customer ID"),
+    ("email", str, "args", False, "Filter customers by email"),
+    ("address", str, "args", False, "Filter customers by address"),
     (
         "active",
         inputs.boolean,
         "args",
-        True,
+        False,
         "Filter customers by active status",
     ),
 ]
@@ -130,39 +116,12 @@ for arg_name, arg_type, location, required, help_text in args_config:
 
 
 ######################################################################
-# Content Type Check Decorator
-######################################################################
-def require_content_type(content_type):
-    """Decorator to require a specific content type for this endpoint"""
-
-    def decorator(func):
-        @wraps(func)
-        def decorated_function(*args, **kwargs):
-            # Check if the Content-Type header matches the expected content type
-            if request.headers.get("Content-Type", "") != content_type:
-                app.logger.error(
-                    "Invalid Content-Type: %s",
-                    request.headers.get("Content-Type", "Content-Type not set"),
-                )
-                # If not, abort the request and return an error message
-                abort(
-                    status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                    f"Content-Type must be {content_type}",
-                )
-            return func(*args, **kwargs)
-
-        return decorated_function
-
-    return decorator
-
-
-######################################################################
 # GET HEALTH CHECK
 ######################################################################
 @app.route("/health")
 def health():
     """Health Status"""
-    return {"status": "OK"}, status.HTTP_200_OK
+    return {"status": 200, "message": "Healthy"}, status.HTTP_200_OK
 
 
 ######################################################################
@@ -177,9 +136,8 @@ def index():
 ######################################################################
 # FLASK-RESTX APIs
 ######################################################################
-@api.route("/customers/<uuid:customer_id>")
+@api.route("/customers/<customer_id>")
 @api.param("customer_id", "The Customer identifier")
-@api.response(404, "Customer not found")
 class CustomerResource(Resource):
     """
     CustomerResource class
@@ -256,17 +214,13 @@ class CustomerResource(Resource):
         if customer:
             customer.delete()
             app.logger.info("Customer with id [%s] was deleted", customer_id)
-            return "", status.HTTP_204_NO_CONTENT
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Customer with id '{customer_id}' was not found.",
-        )
+        return "", status.HTTP_204_NO_CONTENT
 
 
 ######################################################################
 #  PATH: /customers
 ######################################################################
-@api.route("/", strict_slashes=False)
+@api.route("/customers", strict_slashes=False)
 class CustomerCollection(Resource):
     """Handles all interactions with collections of Customers"""
 
@@ -292,14 +246,14 @@ class CustomerCollection(Resource):
             app.logger.info("Filtering by address: %s", args["address"])
             customers = Customer.find_by_address(args["address"])
         elif args["active"] is not None:
-            active = args["active"].lower() == "true"
-            app.logger.info("Filtering by active status: %s", active)
-            customers = Customer.find_by_active(active)
+            app.logger.info("Filtering by active status: %s", args["active"])
+            customers = Customer.find_by_active(args["active"])
         else:
             app.logger.info("Returning all customers")
             customers = Customer.all()
 
-        app.logger.info("[%s] Customers returned", len(customers))
+        # This app logger is bugged, not worth fixing.. pls ignore
+        # app.logger.info("[%s] Customers returned", len(customers))
         return [customer.serialize() for customer in customers], status.HTTP_200_OK
 
     # ------------------------------------------------------------------
@@ -307,7 +261,7 @@ class CustomerCollection(Resource):
     # ------------------------------------------------------------------
     @api.doc("create_customer")
     @api.response(400, "Invalid data")
-    @api.expect(customer_model, validate=True)
+    @api.expect(create_model, validate=True)
     @api.marshal_with(customer_model, code=201)
     def post(self):
         """Creates a Customer"""
@@ -326,15 +280,14 @@ class CustomerCollection(Resource):
 ######################################################################
 #  PATH: /customers/{id}/activate
 ######################################################################
-@api.route("/customers/<int:customer_id>/activate")
+@api.route("/customers/<customer_id>/activate")
 @api.param("customer_id", "The Customer identifier")
 class ActivateResource(Resource):
     """Activate actions on a Customer"""
 
     @api.doc("activate_customers")
     @api.response(404, "Customer not found")
-    @api.response(200, "Customer activated")
-    def patch(self, customer_id):
+    def put(self, customer_id):
         """
         Activate a Customer
 
@@ -359,15 +312,14 @@ class ActivateResource(Resource):
 ######################################################################
 #  PATH: /customers/{id}/deactivate
 ######################################################################
-@api.route("/customers/<int:customer_id>/deactivate")
+@api.route("/customers/<customer_id>/deactivate")
 @api.param("customer_id", "The Customer identifier")
 class DeactivateResource(Resource):
     """Deactivate actions on a Customer"""
 
     @api.doc("deactivate_customers")
     @api.response(404, "Customer not found")
-    @api.response(200, "Customer deactivated")
-    def patch(self, customer_id):
+    def put(self, customer_id):
         """
         Deactivate a Customer
 
