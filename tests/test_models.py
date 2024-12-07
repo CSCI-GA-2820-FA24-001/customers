@@ -96,6 +96,18 @@ class TestCustomer(TestCase):
         except DataValidationError:
             pass
 
+    def test_create_customer_missing_attribute(self):
+        """It should not create a Customer with missing fields"""
+        customer = Customer()
+        with self.assertRaises(DataValidationError):
+            customer.create()
+        customer.name = "foo"
+        with self.assertRaises(DataValidationError):
+            customer.create()
+        customer.email = "foo-email"
+        with self.assertRaises(DataValidationError):
+            customer.create()
+
     def test_read_a_customer(self):
         """It should Read a Customer"""
         customer = CustomerFactory()
@@ -201,3 +213,51 @@ class TestCustomer(TestCase):
         customer.create()
         found_customer = Customer.find_by_active(customer.active)
         self.assertEqual(customer.id, found_customer[0].id)
+
+    def test_deserialize_missing_data(self):
+        """It should raise DataValidationError when deserializing data with missing fields"""
+        data = {
+            "name": "foo",
+        }
+        customer = Customer()
+        with self.assertRaises(DataValidationError):
+            customer.deserialize(data)
+
+        data = {
+            "name": "foo",
+            "email": None,
+            "password": None,
+            "active": True,
+        }
+        with self.assertRaises(DataValidationError):
+            customer.deserialize(data)
+
+        data = {
+            "name": "foo",
+            "email": "",
+            "password": "",
+            "active": True,
+        }
+
+    def test_deserialize_invalid_attribute(self):
+        """It should raise DataValidationError when deserializing data with invalid attributes"""
+        data = ""
+        customer = Customer()
+        with self.assertRaises(DataValidationError):
+            customer.deserialize(data)
+
+    def test_deserialize_bad_data(self):
+        """It should raise DataValidationError when deserializing data with invalid attributes"""
+        # active should be a bool
+        data = {"name": "foo", "email": "bar", "password": "luck", "active": "string"}
+        customer = Customer()
+        with self.assertRaises(DataValidationError):
+            customer.deserialize(data)
+
+        # address is optional
+        customer.name = "foo"
+        customer.email = "bar"
+        customer.password = "luck"
+        customer.active = True
+        customer.create()
+        self.assertIsNotNone(customer.id)
