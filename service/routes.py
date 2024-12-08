@@ -290,8 +290,6 @@ class ActivateResource(Resource):
 
     @api.doc("activate_customers")
     @api.response(404, "Customer not found")
-    @api.response(400, "Invalid data")
-    @api.expect(customer_model, validate=True)
     def put(self, customer_id):
         """
         Activate a Customer
@@ -324,8 +322,6 @@ class DeactivateResource(Resource):
 
     @api.doc("deactivate_customers")
     @api.response(404, "Customer not found")
-    @api.response(400, "Invalid data")
-    @api.expect(customer_model, validate=True)
     def put(self, customer_id):
         """
         Deactivate a Customer
