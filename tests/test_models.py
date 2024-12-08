@@ -171,6 +171,7 @@ class TestCustomer(TestCase):
         customer.create()
         customer.name = " "
         self.assertRaises(DataValidationError, customer.update)
+        customer.name = "foo"
         customer.email = " "
         self.assertRaises(DataValidationError, customer.update)
         customer.password = " "
