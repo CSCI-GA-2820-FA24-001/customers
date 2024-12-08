@@ -47,13 +47,17 @@ class Customer(db.Model):
         app.logger.info("Creating %s, %s, %s", self.name, self.email, self.password)
 
         self.id = None  # pylint: disable=invalid-name
-
         if self.name is None:
             raise DataValidationError("name attribute is not set")
+        if not self.name.strip():
+            raise DataValidationError("name attribute is not set")
         if self.email is None:
-            app.logger.info("no email")
+            raise DataValidationError("email attribute is not set")
+        if not self.email.strip():
             raise DataValidationError("email attribute is not set")
         if self.password is None:
+            raise DataValidationError("password attribute is not set")
+        if not self.password.strip():
             raise DataValidationError("password attribute is not set")
 
         try:
@@ -71,6 +75,12 @@ class Customer(db.Model):
         if not self.id:
             raise DataValidationError("Customer ID cannot be None")
         logger.info("Saving %s", self.name)
+        if not self.name.strip():
+            raise DataValidationError("name attribute is not set")
+        if not self.email.strip():
+            raise DataValidationError("email attribute is not set")
+        if not self.password.strip():
+            raise DataValidationError("password attribute is not set")
         try:
             db.session.commit()
         except Exception as e:

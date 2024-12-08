@@ -335,7 +335,6 @@ class TestCustomerService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         new_customer = response.get_json()
-        new_customer["active"] = True
         response = self.client.put(f"{BASE_URL}/{new_customer['id']}/activate")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.get(f"{BASE_URL}/{new_customer['id']}")

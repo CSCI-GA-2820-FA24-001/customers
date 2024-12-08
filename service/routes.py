@@ -20,11 +20,11 @@ Customer Service
 This service implements a REST API that allows you to Create, Read, Update
 and Delete Customer
 """
-from flask import abort, request
+from flask import abort  # , request
 from flask import current_app as app  # Import Flask application
 from flask_restx import Api, Resource, fields, reqparse, inputs
 from service.models import Customer
-from service.common import status  # HTTP Status Codes
+from service.common import status
 
 ######################################################################
 # Configure Swagger before initializing it
@@ -138,6 +138,7 @@ def index():
 ######################################################################
 @api.route("/customers/<customer_id>")
 @api.param("customer_id", "The Customer identifier")
+@api.response(404, "customer not found")
 class CustomerResource(Resource):
     """
     CustomerResource class
@@ -153,6 +154,7 @@ class CustomerResource(Resource):
     # ------------------------------------------------------------------
     @api.doc("get_customer")
     @api.response(404, "Customer not found")
+    @api.response(400, "The posted Customer data was not valid")
     @api.marshal_with(customer_model)
     def get(self, customer_id):
         """
@@ -176,7 +178,7 @@ class CustomerResource(Resource):
     @api.doc("update_customer")
     @api.response(404, "Customer not found")
     @api.response(400, "The posted Customer data was not valid")
-    @api.expect(customer_model)
+    @api.expect(create_model)
     @api.marshal_with(customer_model)
     def put(self, customer_id):
         """
@@ -203,6 +205,7 @@ class CustomerResource(Resource):
     # ------------------------------------------------------------------
     @api.doc("delete_customer")
     @api.response(204, "Customer deleted")
+    @api.response(400, "The posted Customer data was not valid")
     def delete(self, customer_id):
         """
         Delete a Customer
@@ -261,14 +264,14 @@ class CustomerCollection(Resource):
     # ------------------------------------------------------------------
     @api.doc("create_customer")
     @api.response(400, "Invalid data")
-    @api.expect(create_model, validate=True)
+    @api.expect(create_model)
     @api.marshal_with(customer_model, code=201)
     def post(self):
         """Creates a Customer"""
         app.logger.info("Request to create a new customer")
-        data = request.json
+        # data = request.json
         customer = Customer()
-        customer.deserialize(data)
+        customer.deserialize(api.payload)
         customer.create()
         app.logger.info("Customer with ID [%s] created", customer.id)
         location_url = api.url_for(
@@ -303,10 +306,7 @@ class ActivateResource(Resource):
         customer.active = True
         customer.update()
         app.logger.info("Customer with id [%s] has been activated!", customer.id)
-        return {
-            "message": "Customer activated",
-            "active_status": customer.active,
-        }, status.HTTP_200_OK
+        return customer.serialize(), status.HTTP_200_OK
 
 
 ######################################################################
@@ -335,7 +335,4 @@ class DeactivateResource(Resource):
         customer.active = False
         customer.update()
         app.logger.info("Customer with id [%s] has been deactivated!", customer.id)
-        return {
-            "message": "Customer deactivated",
-            "active_status": customer.active,
-        }, status.HTTP_200_OK
+        return customer.serialize(), status.HTTP_200_OK

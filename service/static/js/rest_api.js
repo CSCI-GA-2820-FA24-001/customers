@@ -270,4 +270,61 @@ $(function () {
 
     });
 
+    // ****************************************
+    // Activate a Pet
+    // ****************************************
+
+    $("#activate-btn").click(function () {
+
+        let customer_id = $("#customer_id").val();
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+                type: "PUT",
+                url: `${BASE_URL}/${customer_id}/activate`,
+                contentType: "application/json",
+                data: ''
+            })
+
+        ajax.done(function(res){
+            update_form_data(res)
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+    // ****************************************
+    // Deactivate a Pet
+    // ****************************************
+
+    $("#deactivate-btn").click(function () {
+
+        let customer_id = $("#customer_id").val();
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+                type: "PUT",
+                url: `${BASE_URL}/${customer_id}/deactivate`,
+                contentType: "application/json",
+                data: ''
+            })
+
+        ajax.done(function(res){
+            update_form_data(res)
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+
 })
