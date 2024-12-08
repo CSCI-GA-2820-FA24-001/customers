@@ -306,10 +306,7 @@ class ActivateResource(Resource):
         customer.active = True
         customer.update()
         app.logger.info("Customer with id [%s] has been activated!", customer.id)
-        return {
-            "message": "Customer activated",
-            "active_status": customer.active,
-        }, status.HTTP_200_OK
+        return customer.serialize(), status.HTTP_200_OK
 
 
 ######################################################################
@@ -338,7 +335,4 @@ class DeactivateResource(Resource):
         customer.active = False
         customer.update()
         app.logger.info("Customer with id [%s] has been deactivated!", customer.id)
-        return {
-            "message": "Customer deactivated",
-            "active_status": customer.active,
-        }, status.HTTP_200_OK
+        return customer.serialize(), status.HTTP_200_OK
