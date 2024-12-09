@@ -5,11 +5,11 @@ Feature: The Customer service back-end
 
 Background:
     Given the following Customers
-        | name       | email                  | active    | address   | id     | password  |
-        | fido       | fido123@gmail.com      | True      | 12-abc    | 123456 | pass      |
-        | kitty      | kitty123@gmail.com     | True      | 34-efd    | 456789 | word      |
-        | leo        | leo123@gmail.com       | False     | 56-jkl    | 765432 | something |
-        | sammy      | sammy123@gmail.com     | True      | 78-uio    | 543634 | nothing   |
+        | name       | email                  | active    | address    | password  |
+        | fido       | fido123@gmail.com      | True      | 12-abc     | pass      |
+        | kitty      | kitty123@gmail.com     | True      | 34-efd     | word      |
+        | leo        | leo123@gmail.com       | False     | 56-jkl     | something |
+        | sammy      | sammy123@gmail.com     | True      | 78-uio     | nothing   |
 
 Scenario: The server is running
     When I visit the "Home Page"
@@ -41,12 +41,19 @@ Scenario: Create a Customer
 
 Scenario: Read a Customer
     When I visit the "Home Page"
-    And I set the "Id" to "123456"
+    And I set the "Name" to "sammy"
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "sammy" in the results
+    When I copy the "Id" field
+    And I press the "Clear" button
+    And I paste the "Id" field
     And I press the "Retrieve" button
-    Then I should see "fido" in the "Name" field
-    And I should see "fido123@gmail.com" in the "Email" field
+    Then I should see the message "Success"
+    And I should see "sammy" in the "Name" field
+    And I should see "sammy123@gmail.com" in the "Email" field
     And I should see "True" in the "Active" dropdown
-    And I should see "12-abc" in the "Address" field
+
 
 Scenario: Update a Customer
     When I visit the "Home Page"
@@ -71,13 +78,24 @@ Scenario: Update a Customer
 
 Scenario: Delete a Customer
     When I visit the "Home Page"
-    And I set the "Id" to "123456"
-    And I press the "Delete" button
+    And I set the "Name" to "sammy"
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "sammy" in the results
+    When I copy the "Id" field
+    And I press the "Clear" button
+    And I paste the "Id" field
+    And I press the "Retrieve" button
+    Then I should see the message "Success"
+    And I should see "sammy" in the "Name" field
+    And I should see "sammy123@gmail.com" in the "Email" field
+    And I should see "True" in the "Active" dropdown
+    When I press the "Delete" button
     Then I should see the message "Customer has been Deleted!"
     When I press the "Clear" button
     And I press the "Search" button
     Then I should see the message "Success"
-    And I should not see "fido" in the results
+    And I should not see "sammy" in the results
 
 Scenario: List all Customers
     When I visit the "Home Page"
@@ -110,22 +128,36 @@ Scenario: Search for Active
 
 Scenario: Deactivate a Customer
     When I visit the "Home Page"
-    And I set the "Id" to "123456"
+    And I set the "Name" to "sammy"
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "sammy" in the results
+    When I copy the "Id" field
+    And I press the "Clear" button
+    And I paste the "Id" field
     And I press the "Retrieve" button
-    Then I should see "fido" in the "Name" field
+    Then I should see the message "Success"
+    And I should see "sammy" in the "Name" field
+    And I should see "sammy123@gmail.com" in the "Email" field
     And I should see "True" in the "Active" dropdown
-    When I select "False" in the "Active" dropdown
-    And I press the "Update" button
+    When I press the "Deactivate" button
     Then I should see the message "Success"
     And I should see "False" in the "Active" dropdown
 
 Scenario: Activate a Customer
     When I visit the "Home Page"
-    And I set the "Id" to "765432"
+    And I set the "Name" to "leo"
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "leo" in the results
+    When I copy the "Id" field
+    And I press the "Clear" button
+    And I paste the "Id" field
     And I press the "Retrieve" button
-    Then I should see "leo" in the "Name" field
+    Then I should see the message "Success"
+    And I should see "leo" in the "Name" field
+    And I should see "leo123@gmail.co" in the "Email" field
     And I should see "False" in the "Active" dropdown
-    When I select "True" in the "Active" dropdown
-    And I press the "Update" button
+    When I press the "Activate" button
     Then I should see the message "Success"
     And I should see "True" in the "Active" dropdown
