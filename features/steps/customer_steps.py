@@ -38,7 +38,7 @@ def step_impl(context):
     """Delete all Customers and load new ones"""
 
     # Get a list all of the pets
-    rest_endpoint = f"{context.base_url}/customers"
+    rest_endpoint = f"{context.base_url}/api/customers"
     context.resp = requests.get(rest_endpoint, timeout=WAIT_TIMEOUT)
     expect(context.resp.status_code).equal_to(HTTP_200_OK)
     # and delete them one by one
@@ -55,7 +55,6 @@ def step_impl(context):
             "email": row["email"],
             "active": row["active"] in ["True", "true", "1"],
             "address": row["address"],
-            "id": row["id"],
             "password": row["password"],
         }
         context.resp = requests.post(rest_endpoint, json=payload, timeout=WAIT_TIMEOUT)
