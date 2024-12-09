@@ -101,7 +101,13 @@ class TestCustomer(TestCase):
         customer = Customer()
         with self.assertRaises(DataValidationError):
             customer.create()
+        customer.name = " "
+        with self.assertRaises(DataValidationError):
+            customer.create()
         customer.name = "foo"
+        with self.assertRaises(DataValidationError):
+            customer.create()
+        customer.email = " "
         with self.assertRaises(DataValidationError):
             customer.create()
         customer.email = "foo-email"
@@ -154,8 +160,21 @@ class TestCustomer(TestCase):
     def test_update_no_id(self):
         """It should not Update a Customer with no id"""
         customer = CustomerFactory()
+        customer.create()
         logging.debug(customer)
         customer.id = None
+        self.assertRaises(DataValidationError, customer.update)
+
+    def test_update_missing_fields(self):
+        """It should not Update a Customer with missing fields"""
+        customer = CustomerFactory()
+        customer.create()
+        customer.name = " "
+        self.assertRaises(DataValidationError, customer.update)
+        customer.name = "foo"
+        customer.email = " "
+        self.assertRaises(DataValidationError, customer.update)
+        customer.password = " "
         self.assertRaises(DataValidationError, customer.update)
 
     def test_delete_a_customer(self):
