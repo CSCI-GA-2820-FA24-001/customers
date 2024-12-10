@@ -162,9 +162,9 @@ Scenario: Activate a Customer
     Then I should see the message "Success"
     And I should see "True" in the "Active" dropdown
 
-Scenario: Handle Nonexistent Customer Retrieval Gracefully
-    Given I visit the "Home Page"
-    When I set the "Id" to "999999"
+Scenario: Handle Nonexistent Customer Retrieval 
+    When I visit the "Home Page"
+    And I set the "Id" to "999999"
     And I press the "Retrieve" button
     Then I should see the message "Customer not found"
     And the "Name" field should be empty
@@ -172,9 +172,10 @@ Scenario: Handle Nonexistent Customer Retrieval Gracefully
     And the "Address" field should be empty
     And I should see "False" in the "Active" dropdown
 
+
 Scenario: Query a Customer by Email
-    Given I visit the "Home Page"
-    When I set the "Email" to "will.dixon@hotmail.com"
+    When I visit the "Home Page"
+    And I set the "Email" to "will.dixon@hotmail.com"
     And I press the "Search" button
     Then I should see the message "Success"
     And I should see "William" in the "First Name" field
