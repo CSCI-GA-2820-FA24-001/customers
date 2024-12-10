@@ -138,7 +138,6 @@ def index():
 ######################################################################
 @api.route("/customers/<customer_id>")
 @api.param("customer_id", "The Customer identifier")
-@api.response(404, "customer not found")
 class CustomerResource(Resource):
     """
     CustomerResource class
@@ -154,7 +153,6 @@ class CustomerResource(Resource):
     # ------------------------------------------------------------------
     @api.doc("get_customer")
     @api.response(404, "Customer not found")
-    @api.response(400, "The posted Customer data was not valid")
     @api.marshal_with(customer_model)
     def get(self, customer_id):
         """
