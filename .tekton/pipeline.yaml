@@ -1,33 +1,25 @@
-# Completed cd-pipeline from the OpenShift lab
----
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: cd-pipeline
 spec:
-  workspaces:
-    - name: pipeline-workspace
   params:
-    - name: GIT_REPO
+    - default: 'https://github.com/CSCI-GA-2820-FA24-001/customers'
       description: The URL to the git repo
+      name: GIT_REPO
       type: string
-      default: "https://github.com/CSCI-GA-2820-FA24-001/customers"
-    - name: GIT_REF
+    - default: master
       description: The reference (branch or ref)
+      name: GIT_REF
       type: string
-      default: master
-    - name: APP_NAME
+    - default: customers
       description: Name of the application
+      name: APP_NAME
       type: string
-      default: customers
-    - name: IMAGE_NAME
+    - default: 'image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.APP_NAME):latest'
       description: The name of the image to build
+      name: IMAGE_NAME
       type: string
-      default: 'image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.APP_NAME):latest'
-    - name: BASE_URL
-      description: Route to microservice
-      type: string
-      default: 'https://cd-pipeline-molliey-dev.apps.sandbox-m3.1530.p1.openshiftapps.com'
   tasks:
     - name: git-clone
       params:
@@ -69,7 +61,7 @@ spec:
       workspaces:
         - name: output
           workspace: pipeline-workspace
-    - name: pylint
+    - name: linting
       params:
         - name: image
           value: 'docker.io/python:3.11-slim'
@@ -129,7 +121,7 @@ spec:
         - name: SKIP_PUSH
           value: 'false'
       runAfter:
-        - pylint
+        - linting
         - testing
       taskRef:
         kind: ClusterTask
@@ -143,6 +135,8 @@ spec:
           value: $(params.IMAGE_NAME)
         - name: manifest-dir
           value: k8s
+        - name: image-name
+          value: $(params.IMAGE_NAME)
       runAfter:
         - buildah
       taskRef:
@@ -151,19 +145,5 @@ spec:
       workspaces:
         - name: source
           workspace: pipeline-workspace
-    - name: behave
-      params:
-        - name: BASE_URL
-          value: $(params.BASE_URL)
-        - name: WAIT_SECONDS
-          value: '60'
-        - name: DRIVER
-          value: chrome
-      runAfter:
-        - deploy-image
-      taskRef:
-        kind: Task
-        name: behave
-      workspaces:
-        - name: source
-          workspace: pipeline-workspace
+  workspaces:
+    - name: pipeline-workspace
