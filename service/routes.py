@@ -203,7 +203,6 @@ class CustomerResource(Resource):
     # ------------------------------------------------------------------
     @api.doc("delete_customer")
     @api.response(204, "Customer deleted")
-    @api.response(400, "The posted Customer data was not valid")
     def delete(self, customer_id):
         """
         Delete a Customer
