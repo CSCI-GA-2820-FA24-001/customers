@@ -161,3 +161,16 @@ Scenario: Activate a Customer
     When I press the "Activate" button
     Then I should see the message "Success"
     And I should see "True" in the "Active" dropdown
+
+Scenario: Handle Nonexistent Customer Retrieval 
+  Given I am on the "Home Page"
+  When I set the "Id" field to a value that does not exist, such as "999999"
+  And I press the "Retrieve" button
+  Then I should see a clear error message, such as "Customer not found"
+  And the "Name" field should remain empty
+  And the "Email" field should remain empty
+  And the "Address" field should remain empty
+  And the "Active" dropdown should default to "False"
+
+
+
