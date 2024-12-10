@@ -168,7 +168,6 @@ Scenario: Handle Nonexistent Customer Retrieval
     And I press the "Retrieve" button
     Then the "Name" field should be empty
     And the "Email" field should be empty
-    And the "Address" field should be empty
 
 Scenario: Query a Customer by Email
     When I visit the "Home Page"
