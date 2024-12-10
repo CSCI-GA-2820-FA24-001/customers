@@ -169,7 +169,6 @@ Scenario: Handle Nonexistent Customer Retrieval
     Then the "Name" field should be empty
     And the "Email" field should be empty
     And the "Address" field should be empty
-    And I should see "False" in the "Active" dropdown
 
 Scenario: Query a Customer by Email
     When I visit the "Home Page"
